@@ -1,0 +1,42 @@
+# The name of the workflow — this label appears in the "Actions" tab on GitHub
+name: CI pipeline
+
+# "on" defines the events that trigger this workflow
+on:
+  # Trigger when code is pushed (committed) to the "main" branch
+  push:
+    branches: [ main ]
+  # Also trigger when a pull request is opened or updated targeting "main"
+  pull_request:
+    branches: [ main ]
+
+# "jobs" defines one or more jobs that this workflow will run
+jobs:
+  # "build" is a custome ID/name of this job
+  build:
+    # The type of virtual machine (runner) to execute this job on
+    # "ubuntu-latest" spins up a fresh Ubuntu Linux VM provided by GitHub
+    runs-on: ubuntu-latest
+
+    # "steps" is an ordered list of tasks this job will perform
+    steps:
+      # Step 1: Clone the repository code into a runner VM
+      # Without this step, the runner has no access to your source code
+      - name: Checkout code
+        uses: actions/checkout@v5  # Official GitHub action to checkout the repo (version 5)
+
+      # Step 2: Install Node.js on the runner so we can use npm and node commands
+      - name: Setup Node.js
+        uses: actions/setup-node@v5  # Official GitHub action to set up Node.js (version 5)
+        with:
+          node-version: '20'  # Specifies that Node.js version 20 should be installed
+
+      # Step 3: Install all project dependencies listed in package.json
+      # This creates the node_modules/ folder with all required packages
+      - name: Install dependencies
+        run: npm install  # Shell command: reads package.json and installs dependencies
+
+      # Step 4: Run the test suite defined in the "test" script of package.json
+      # If any test fails, this step fails and the entire workflow is marked as failed
+      - name: Run tests
+        run: npm test  # Shell command: executes the "test" script from package.json
